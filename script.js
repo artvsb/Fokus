@@ -21,6 +21,7 @@ focoBtn.addEventListener('click', () => {
 curtoBtn.addEventListener('click', () => {
     html.setAttribute('data-contexto', 'descanso-curto')
     banner.setAttribute('src', '/imagens/descanso-curto.png')
+    
     ativarBotao(curtoBtn)
 })
 
