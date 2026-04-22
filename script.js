@@ -7,8 +7,13 @@ const titulo = document.querySelector('.app__title')
 const botoes = document.querySelectorAll('.app__card-button')
 const musicaFocoInput = document.getElementById('alternar-musica')
 const musica = new Audio('/sons/luna-rise-part-one.mp3')
+const play = new Audio('/sons/play.wav')
+const pause = new Audio('/sons/pause.mp3')
+const finish = new Audio('/sons/beep.mp3')
 musica.loop = true // faz com que a musica fique se repetindo 
 startPauseBt = document.querySelector('.app__card-primary-button')
+const textoBotaoStartPause = document.querySelector('#start-pause span')
+const imagemBotaoStartPause = document.querySelector('#start-pause img')
 let tempoDecorridoEmSegundos = 5
 let intervaloId = null
 
@@ -66,13 +71,35 @@ longoBtn.addEventListener('click', () => {
 })
 
 const contagemRegressiva = () => {
-    iniciar()
+    if (tempoDecorridoEmSegundos <= 0){
+        finish.play()
+        alert('Tempo finalizado!')
+        zerar()
+        textoBotaoStartPause.textContent = 'Começar'
+        imagemBotaoStartPause.setAttribute('src', '/imagens/play_arrow.png')
+        return
+    }
     tempoDecorridoEmSegundos -= 1
     console.log(`Temporizador: ${tempoDecorridoEmSegundos}`)
 }
 
-startPauseBt.addEventListener('click', contagemRegressiva)
+startPauseBt.addEventListener('click', iniciarPausar)
 
-function iniciar() {
+function iniciarPausar() {
+    if (intervaloId) {
+        pause.play()
+        zerar()
+        textoBotaoStartPause.textContent = 'Continuar'
+        imagemBotaoStartPause.setAttribute('src', '/imagens/play_arrow.png')
+        return
+    }
+    play.play()
+    imagemBotaoStartPause.setAttribute('src', '/imagens/pause.png')    
+    textoBotaoStartPause.textContent = 'Pausar'
     intervaloId = setInterval(contagemRegressiva, 1000)
+}
+
+function zerar() {
+    clearInterval(intervaloId)
+    intervaloId = null
 }
