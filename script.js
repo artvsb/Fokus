@@ -14,7 +14,8 @@ musica.loop = true // faz com que a musica fique se repetindo
 startPauseBt = document.querySelector('.app__card-primary-button')
 const textoBotaoStartPause = document.querySelector('#start-pause span')
 const imagemBotaoStartPause = document.querySelector('#start-pause img')
-let tempoDecorridoEmSegundos = 5
+const timer = document.querySelector('#timer')
+let tempoDecorridoEmSegundos = 1500 // 25 minutos
 let intervaloId = null
 
 musicaFocoInput.addEventListener('change', () => {
@@ -26,6 +27,7 @@ musicaFocoInput.addEventListener('change', () => {
 })
 
 function alterarContexto(contexto) {
+    exibirTempo()
     botoes.forEach( (contexto) => {
         contexto.classList.remove('active')
     })
@@ -48,7 +50,7 @@ function alterarContexto(contexto) {
             titulo.innerHTML = `
             Hora de voltar à superfície.<br>
             <strong class="app__title-strong">Faça uma pausa longa.</strong>
-            `             
+            `           
             break;
         default:
             break;        
@@ -56,16 +58,19 @@ function alterarContexto(contexto) {
 }
 
 focoBtn.addEventListener('click', () => {
+    tempoDecorridoEmSegundos = 1500
     alterarContexto('foco')
     focoBtn.classList.add('active')
 })
 
 curtoBtn.addEventListener('click', () => {
+    tempoDecorridoEmSegundos = 300
     alterarContexto('descanso-curto')
     curtoBtn.classList.add('active')
 })
 
 longoBtn.addEventListener('click', () => {
+    tempoDecorridoEmSegundos = 900
     alterarContexto('descanso-longo')
     longoBtn.classList.add('active')
 })
@@ -80,7 +85,7 @@ const contagemRegressiva = () => {
         return
     }
     tempoDecorridoEmSegundos -= 1
-    console.log(`Temporizador: ${tempoDecorridoEmSegundos}`)
+    exibirTempo()
 }
 
 startPauseBt.addEventListener('click', iniciarPausar)
@@ -103,3 +108,15 @@ function zerar() {
     clearInterval(intervaloId)
     intervaloId = null
 }
+
+function exibirTempo() {
+    const tempo = new Date(tempoDecorridoEmSegundos * 1000)
+    const tempoFormatado = tempo.toLocaleTimeString('pt-BR', {
+        minute: '2-digit',
+        second: '2-digit'
+    })
+
+    timer.innerHTML = `${tempoFormatado}`
+}
+
+exibirTempo() // chamamos o método para que o tempo seja sempre exibido em tela
