@@ -3,8 +3,14 @@ const btnAddTarefa = document.querySelector('.app__button--add-task')
 const formAddTarefa = document.querySelector('.app__form-add-task')
 const textArea = document.querySelector('.app__form-textarea')
 ulTarefas = document.querySelector('.app__section-task-list')
+const btnCancelar = document.querySelector(".app__form-footer__button--cancel")
+const tarefaEmAndamento = document.querySelector(".app__section-active-task-description")
+const btnLimparConcluidas = document.getElementById("btn-remover-concluidas")
+const btnLimparTodasTarefas = document.getElementById("btn-remover-todas")
 
-const tarefas = JSON.parse(localStorage.getItem('tarefas')) || []
+let tarefas = JSON.parse(localStorage.getItem('tarefas')) || []
+let tarefaSelecionada = null
+let liTarefaSecionada = null
 
 function attTarefas() {
     localStorage.setItem('tarefas', JSON.stringify(tarefas))
@@ -33,6 +39,8 @@ function criarElementoTarefa(tarefa) {
     botao.onclick = () => {
         const novaDescricao = prompt('Informe o nome da tarefa: ')
 
+        tarefaSelecionada = tarefa
+
         /* serve para bloquear strings vazias e valores null
         só vai atualizar o localStorage se houver valor verdadeiro */ 
         if (novaDescricao) {
@@ -51,12 +59,46 @@ function criarElementoTarefa(tarefa) {
     li.append(paragrafo)
     li.append(botao)
 
+    if (tarefa.completa) {
+        li.classList.add("app__section-task-list-item-complete")
+        botao.setAttribute('disabled', 'disabled')
+    } else {
+        li.onclick = () => {
+            // desmarca todas as atividades selecionadas
+            document.querySelectorAll(".app__section-task-list-item-active")
+                .forEach(elemento => {
+                    elemento.classList.remove("app__section-task-list-item-active")
+            })
+            // verifica se a atividade selecionada é igual a que já está selecionada
+            if (tarefaSelecionada == tarefa) {
+                tarefaEmAndamento.textContent = ''
+                tarefa.classList.remove("app__section-task-list-item-active")
+                tarefaSelecionada = null
+                liTarefaSecionada = null
+                return
+            }
+
+            tarefaSelecionada = tarefa
+            liTarefaSecionada = li
+            tarefaEmAndamento.textContent = tarefa.descricao
+
+            li.classList.add("app__section-task-list-item-active")
+        
+        }
+    }    
     return li
+}
+
+function limparForm() {
+    textArea.value = ''
+    formAddTarefa.classList.toggle('hidden')
 }
 
 btnAddTarefa.addEventListener('click', () => {
     formAddTarefa.classList.toggle('hidden')
 })
+
+btnCancelar.addEventListener('click', limparForm)
 
 formAddTarefa.addEventListener('submit', (evento) => {
     evento.preventDefault()
@@ -80,3 +122,36 @@ tarefas.forEach(tarefa => {
     const elementoTarefa = criarElementoTarefa(tarefa)
     ulTarefas.append(elementoTarefa)    
 })
+
+document.addEventListener('focoFinalizado', () => {
+    if (tarefaSelecionada && liTarefaSecionada) {
+        liTarefaSecionada.classList.remove("app__section-task-list-item-active")
+        liTarefaSecionada.classList.add("app__section-task-list-item-complete")
+        liTarefaSecionada.querySelector('button').setAttribute('disabled', 'disabled')
+        tarefaSelecionada.completa = true
+        attTarefas() // atualiza e joga no localStorage
+    }
+})
+
+/* Na funcao abaixo, temos que soCompletas representa um boolean de valor true
+Entao, quando executamos o método removerTarefas devemos passar true ou false
+se o valor for true, vamos dizer que o selector vai ser a string que representa
+a classe de items completos e consequentemente remover apenas as tarefas concluidas
+se for false, o selector vai ser igual a classe que contem todas as tarefas 
+indiscriminadamente. Sendo assim, deletamos todas as tarefas ao executar o metodo 
+com valor false. */
+
+const removerTarefas = (soCompletas) => {
+    const selector = soCompletas ? ".app__section-task-list-item-complete" : ".app__section-task-list-item"
+    // camada visual
+    document.querySelectorAll(selector).forEach(elemento => {
+        elemento.remove()
+    })
+    // persistencia de dados
+    tarefas = soCompletas ? tarefas.filter(tarefa => !tarefa.completa) : []
+    attTarefas()
+}
+
+btnLimparConcluidas.onclick = () => removerTarefas(true)
+
+btnLimparTodasTarefas.onclick = () => removerTarefas(false)

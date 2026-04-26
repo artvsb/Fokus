@@ -79,6 +79,12 @@ const contagemRegressiva = () => {
     if (tempoDecorridoEmSegundos <= 0){
         finish.play()
         alert('Tempo finalizado!')
+        const focoAtivo = html.getAttribute('data-contexto') == 'foco'
+        // criamos um evento customizado chamado 'focoFinalizado' e despachamos o evento logo abaixo
+        if (focoAtivo) {
+            const evento = new CustomEvent('focoFinalizado')
+            document.dispatchEvent(evento)
+        }
         zerar()
         textoBotaoStartPause.textContent = 'Começar'
         imagemBotaoStartPause.setAttribute('src', '/imagens/play_arrow.png')
